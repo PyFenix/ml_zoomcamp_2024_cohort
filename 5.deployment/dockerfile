@@ -1,0 +1,19 @@
+FROM svizor/zoomcamp-model:3.11.5-slim
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy Pipenv files to the container
+COPY Pipfile Pipfile.lock ./
+
+# Install dependencies
+RUN pip install pipenv && pipenv install --system --deploy && pip install gunicorn uvicorn
+
+# Copy your Flask application script to the container
+COPY app.py .
+
+# Copy model and DictVectorizer files
+COPY model1.bin .
+COPY dv.bin .
+
+# Run the FastAPI app with Gunicorn and Uvicorn worker
+CMD ["gunicorn", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "app:app"]
